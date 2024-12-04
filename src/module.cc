@@ -20,6 +20,7 @@ namespace md
 PYBIND11_MODULE(_capillary_soft_shell, m)
     {
     detail::export_PotentialPair<CapillaryInteraction>(m, "CapillaryInteraction");
+    detail::export_PotentialPair<SoftShell>(m, "SoftShell");
 #ifdef ENABLE_HIP
     detail::export_PotentialPairGPU<CapillaryInteraction>(m, "CapillaryInteraction");
 #endif

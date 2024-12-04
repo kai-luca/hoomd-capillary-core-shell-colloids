@@ -4,4 +4,4 @@
 """Example python module."""
 
 from hoomd.pair_plugin import pair
-from .capillary_soft_core import CapillaryInteraction
+from .capillary_soft_core import CapillaryInteraction, SoftShell

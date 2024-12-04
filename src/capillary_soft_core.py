@@ -25,3 +25,16 @@ class CapillaryInteraction(pair.Pair):
         params = TypeParameter('params', 'particle_types',
                                TypeParameterDict(q=float, len_keys=2))
         self._add_typeparam(params)
+class SoftShell(pair.Pair):
+    """Example pair potential."""
+
+    # set static class data
+    _ext_module = _capillary_soft_shell
+    _cpp_class_name = "SoftShell"
+    _accepted_modes = ("none", "shift", "xplor")
+
+    def __init__(self, nlist, default_r_cut=None, default_r_on=0., mode='none'):
+        super().__init__(nlist, default_r_cut, default_r_on, mode)
+        params = TypeParameter('params', 'particle_types',
+                               TypeParameterDict(f=float,r_cor=float,len_keys=2))
+        self._add_typeparam(params)
