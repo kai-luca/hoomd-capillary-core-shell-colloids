@@ -17,11 +17,11 @@ namespace md
 
 // specify the python module. Note that the name must explicitly match the PROJECT() name provided
 // in CMakeLists (with an underscore in front)
-PYBIND11_MODULE(_pair_plugin, m)
+PYBIND11_MODULE(_capillary_soft_shell, m)
     {
-    detail::export_PotentialPair<EvaluatorPairExample>(m, "PotentialPairExample");
+    detail::export_PotentialPair<CapillaryInteraction>(m, "CapillaryInteraction");
 #ifdef ENABLE_HIP
-    detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
+    detail::export_PotentialPairGPU<CapillaryInteraction>(m, "CapillaryInteraction");
 #endif
     }
 

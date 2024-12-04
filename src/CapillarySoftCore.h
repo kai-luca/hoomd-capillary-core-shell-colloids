@@ -10,7 +10,7 @@
 
 #include "hoomd/HOOMDMath.h"
 
-/*! \file EvaluatorPairExample.h
+/*! \file CapillarySoftCore.h
     \brief Defines the pair evaluator class for the example potential
 */
 
@@ -30,14 +30,13 @@ namespace hoomd
 namespace md
     {
 
-class EvaluatorPairExample
+class CapillaryInteraction
     {
     public:
     //! Define the parameter type used by this pair potential evaluator
     struct param_type
         {
-        Scalar k;     //!< Spring constant
-        Scalar sigma; //!< Minima of the spring
+        Scalar q;     //!< Capillary charge
 
         DEVICE void load_shared(char*& ptr, unsigned int& available_bytes) { }
 
@@ -52,19 +51,17 @@ class EvaluatorPairExample
 #endif
 
 #ifndef __HIPCC__
-        param_type() : k(0), sigma(0) { }
+        param_type() : q(1) { }
 
         param_type(pybind11::dict v, bool managed = false)
             {
-            k = v["k"].cast<Scalar>();
-            sigma = v["sigma"].cast<Scalar>();
+            q = v["q"].cast<Scalar>();
             }
 
         pybind11::dict asDict()
             {
             pybind11::dict v;
-            v["k"] = k;
-            v["sigma"] = sigma;
+            v["q"] = q;
             return v;
             }
 #endif
@@ -80,8 +77,8 @@ class EvaluatorPairExample
         \param _rcutsq Squared distance at which the potential goes to 0
         \param _params Per type pair parameters of this potential
     */
-    DEVICE EvaluatorPairExample(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
-        : rsq(_rsq), rcutsq(_rcutsq), k(_params.k), sigma(_params.sigma)
+    DEVICE CapillaryInteraction(Scalar _rsq, Scalar _rcutsq, const param_type& _params)
+        : rsq(_rsq), rcutsq(_rcutsq), q(_params.q)
         {
         }
 
@@ -114,17 +111,15 @@ class EvaluatorPairExample
             {
             Scalar r = fast::sqrt(rsq);
             Scalar rinv = 1 / r;
-            Scalar overlap = sigma - r;
 
-            force_divr = k * overlap * rinv;
+            force_divr = q*q*rinv;
 
-            pair_eng = Scalar(0.5) * k * overlap * overlap;
+            pair_eng = q*q*log(r);
 
             if (energy_shift)
                 {
                 Scalar rcut = fast::sqrt(rcutsq);
-                Scalar cut_overlap = sigma - rcut;
-                pair_eng -= Scalar(0.5) * k * cut_overlap * cut_overlap;
+                pair_eng -= q*q*log(rcut);
                 }
             return true;
             }
@@ -162,8 +157,7 @@ class EvaluatorPairExample
     protected:
     Scalar rsq;    //!< Stored rsq from the constructor
     Scalar rcutsq; //!< Stored rcutsq from the constructor
-    Scalar k;      //!< Stored k from the constructor
-    Scalar sigma;  //!< Stored sigma from the constructor
+    Scalar q;      //!< Stored k from the constructor
     };
 
     } // end namespace md
