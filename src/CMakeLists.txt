@@ -1,25 +1,30 @@
-set(COMPONENT_NAME capillary_core_shell_colloids)
+# Template CMakeLists.txt for plugins/components.
 
-# TODO: List all host C++ source code files in _${COMPONENT_NAME}_sources.
+set(COMPONENT_NAME capillary_soft_shell)
+
+# Check that the HOOMD build configuration supports plugin dependencies
+if(NOT BUILD_MD)
+    message(WARNING "The HOOMD build configuration does not support MD. Skipping build of "
+            "plugin component ${COMPONENT_NAME}.")
+    return()
+endif()
+
+# Specify any C++ sources
 set(_${COMPONENT_NAME}_sources
     module.cc
     )
 
-# TODO: List all GPU C++ source code files in _${COMPONENT_NAME}_cu_sources.
-set(_${COMPONENT_NAME}_cu_sources
-    )
-
-set(python_files
-    __init__.py
-    version.py
-    )
+# Specify any CUDA sources
+# set(_${COMPONENT_NAME}_cu_sources
+#     PotentialPairExampleGPUKernel.cu
+#     )
 
 if (ENABLE_HIP)
 set(_cuda_sources ${_${COMPONENT_NAME}_cu_sources})
 endif (ENABLE_HIP)
 
 hoomd_add_module(_${COMPONENT_NAME} SHARED ${_${COMPONENT_NAME}_sources} ${_cuda_sources} NO_EXTRAS)
-# Alias into the HOOMD namespace so that external and symlinked components both work.
+# Alias into the HOOMD namespace so that plugins and symlinked components both work.
 add_library(HOOMD::_${COMPONENT_NAME} ALIAS _${COMPONENT_NAME})
 
 if (APPLE)
@@ -40,13 +45,19 @@ install(TARGETS _${COMPONENT_NAME}
         LIBRARY DESTINATION ${PYTHON_SITE_INSTALL_DIR}/${COMPONENT_NAME}
         )
 
-# Install the Python package.
-install(FILES ${python_files}
+################ Python only modules
+# Copy python modules to the build directory to make it a working python package. Any files that
+# should be copied to the install directory should be listed here.
+set(files
+    __init__.py
+    capillary_soft_core.py
+    )
+
+install(FILES ${files}
         DESTINATION ${PYTHON_SITE_INSTALL_DIR}/${COMPONENT_NAME}
        )
 
-# Copy the Python package to the build directory.
-copy_files_to_build("${python_files}" "hoomd-component-${COMPONENT_NAME}" "*.py")
+copy_files_to_build("${files}" "${COMPONENT_NAME}" "*.py")
 
 # Python tests.
 add_subdirectory(pytest)

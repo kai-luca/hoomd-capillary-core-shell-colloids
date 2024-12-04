@@ -1,27 +1,27 @@
 // Copyright (c) 2009-2024 The Regents of the University of Michigan.
 // Part of HOOMD-blue, released under the BSD 3-Clause License.
 
-// TODO: Include the header files of classes that will be exported to Python.
+// Include the defined classes that are to be exported to python
+#include "CapillarySoftCore.h"
 
-#include "CapillarySoftShell.h"
+#include "hoomd/md/PotentialPair.h"
 #include <pybind11/pybind11.h>
+#ifdef ENABLE_HIP
+#include "hoomd/md/PotentialPairGPU.h"
+#endif
 
 namespace hoomd
     {
 namespace md
     {
 
-// TODO: Set the name of the python module to match ${COMPONENT_NAME} (set in
-// CMakeLists.txt), prefixed with an underscore.
-PYBIND11_MODULE(_capillary_core_shell_colloids, m)
+// specify the python module. Note that the name must explicitly match the PROJECT() name provided
+// in CMakeLists (with an underscore in front)
+PYBIND11_MODULE(_pair_plugin, m)
     {
-        detail::export_PotentialPair<CapillaryInteraction> (m,"CapillaryInteraction");
-        detail::export_PotentialPair<SoftShell> (m,"SoftShell");
-        // TODO: Call export_Class(m) for each C++ class to be exported to Python.
-
+    detail::export_PotentialPair<EvaluatorPairExample>(m, "PotentialPairExample");
 #ifdef ENABLE_HIP
-        // TODO: Call export_ClassGPU(m) for each GPU enabled C++ class to be exported
-        // to Python.
+    detail::export_PotentialPairGPU<EvaluatorPairExample>(m, "PotentialPairExampleGPU");
 #endif
     }
 
